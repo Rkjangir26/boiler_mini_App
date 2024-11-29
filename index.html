@@ -1,74 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>TON Connect Integration</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TON Connect Wallet Integration</title>
 
-    <!-- Include TON Connect SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/sdk@latest"></script>
+    <!-- TON Connect SDK -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 </head>
 <body>
     <h1>TON Connect Wallet Integration</h1>
 
-    <!-- Button to connect to the wallet -->
-    <div id="ton-connect"></div>
-    <button onclick="connectToWallet()">Connect to Wallet</button>
-    <button onclick="sendTransaction()">Send Transaction</button>
-    <button onclick="disconnectWallet()">Disconnect Wallet</button>
+    <!-- Button to trigger wallet connection -->
+    <button id="connect-btn">Connect to Wallet</button>
 
     <script>
-        // Initialize TON Connect UI
-        const tonConnectUI = new TONConnectUI({
-            manifestUrl: 'https://https://rkjangir26.github.io/boiler_mini_App//tonconnect-manifest.json', // Replace with your manifest URL
-            buttonRootId: 'ton-connect'  // Root ID for the button
-        });
+        window.onload = function() {
+            // Initialize TONConnectUI when the window is loaded
+            const tonConnectUI = new TONConnectUI({
+                manifestUrl: 'https://yourapp.com/tonconnect-manifest.json', // Replace with your app's manifest URL
+                buttonRootId: 'ton-connect' // The root ID for the button
+            });
 
-        // Connect to the wallet
-        async function connectToWallet() {
-            try {
-                const wallet = await tonConnectUI.connectWallet();
-                console.log('Connected Wallet:', wallet);
-                alert(`Connected to wallet: ${wallet.address}`);
-            } catch (error) {
-                console.error('Error connecting to wallet:', error);
-                alert('Failed to connect to wallet.');
+            // Function to connect to wallet
+            async function connectToWallet() {
+                try {
+                    const wallet = await tonConnectUI.connectWallet();
+                    console.log('Connected Wallet:', wallet);
+                    alert(`Connected to wallet: ${wallet.address}`);
+                } catch (error) {
+                    console.error('Error connecting to wallet:', error);
+                    alert('Failed to connect to wallet.');
+                }
             }
-        }
 
-        // Send a transaction
-        async function sendTransaction() {
-            const transaction = {
-                messages: [
-                    {
-                        address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0", // Replace with the recipient's address
-                        amount: "20000000" // Amount in nanotons (1 TON = 1e9 nanotons)
-                    }
-                ]
-            };
-
-            try {
-                const result = await tonConnectUI.sendTransaction(transaction);
-                console.log('Transaction Result:', result);
-                alert('Transaction sent successfully!');
-            } catch (error) {
-                console.error('Error sending transaction:', error);
-                alert('Failed to send transaction.');
-            }
-        }
-
-        // Disconnect the wallet
-        async function disconnectWallet() {
-            try {
-                await tonConnectUI.disconnect();
-                console.log('Wallet disconnected');
-                alert('Wallet disconnected successfully!');
-            } catch (error) {
-                console.error('Error disconnecting wallet:', error);
-                alert('Failed to disconnect wallet.');
-            }
-        }
+            // Add event listener to the connect button
+            document.getElementById('connect-btn').addEventListener('click', connectToWallet);
+        };
     </script>
 </body>
 </html>
