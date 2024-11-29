@@ -1,12 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Telegram Mini Apps with TON Connect</title>
     <style>
-        /* (CSS styles remain the same as in the previous file) */
+        body {
+            --bg-color: var(--tg-theme-bg-color);
+            font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 48px 24px;
+            padding: 0;
+            color-scheme: var(--tg-color-scheme);
+        }
+
+        a {
+            color: var(--tg-theme-link-color);
+        }
+
+        #viewport {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: var(--tg-viewport-stable-height, 100vh);
+            pointer-events: none;
+            transition: all .2s ease;
+        }
+
+        #viewport:after {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            border-width: 4px;
+            border-style: solid;
+            border-image: linear-gradient(45deg, rgba(64, 224, 208, .5), rgba(173, 255, 47, .5)) 1;
+        }
+
+        #viewport-params-size,
+        #viewport-params-expand {
+            position: absolute;
+            display: inline-block;
+            background: var(--tg-theme-link-color, rgb(64, 224, 208));
+            right: 4px;
+            left: auto;
+            font-size: 8px;
+            padding: 4px;
+            vertical-align: top;
+        }
+
+        #viewport-params-size {
+            top: 4px;
+        }
+
+        #viewport-params-expand {
+            top: 30px;
+        }
     </style>
 </head>
 
@@ -15,7 +71,6 @@
         <div align="center">
             <a href="https://ton.org/"><img width="48" src="./assets/tapps.png" alt="logo of telegram web apps"></a>
         </div>
-
         <h1>TON Connect</h1>
         <div id="ton-connect"></div>
         <button onclick="connectToWallet()">Connect Wallet</button>
@@ -26,12 +81,31 @@
         <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
         <button onclick="showPopup();">Launch Popup</button>
 
-        <!-- Other sections (Links, Buttons, etc.) remain unchanged -->
-    </main>
+        <h1>Links</h1>
+        <ul>
+            <li>
+                <a href="javascript:Telegram.WebApp.openTelegramLink('https://t.me/trendingapps');">Open link within Telegram</a>
+            </li>
+            <li>
+                <a href="javascript:Telegram.WebApp.openLink('https://ton.org/');">Open link in external browser</a>
+            </li>
+            <li>
+                <a href="javascript:Telegram.WebApp.openLink('https://telegra.ph/api',{try_instant_view:true});">Open link inside Telegram webview</a>
+            </li>
+        </ul>
 
-    <!-- Scripts -->
+        <h1>Buttons</h1>
+        <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
+        <button onclick="toggleMainButton();">Toggle Main Button</button>
+    </main>
+    <div id="viewport"></div>
+    <div id="viewport-params-size"></div>
+    <div id="viewport-params-expand"></div>
+
+    <!-- Import Telegram Web App and TON Connect UI scripts -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui"></script>
+
     <script>
         // Initialize TON Connect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
@@ -42,14 +116,10 @@
         async function connectToWallet() {
             try {
                 console.log("Opening wallet selection popup...");
-                // Trigger wallet connection flow (shows all available wallets)
                 const connectedWallet = await tonConnectUI.connectWallet({
-                    uiPreferences: {
-                        forceModal: true, // Ensures the wallet selection modal is shown
-                    }
+                    uiPreferences: { forceModal: true }
                 });
-
-                console.log("Wallet connected:", connectedWallet);
+                console.log("Connected wallet:", connectedWallet);
                 Telegram.WebApp.showAlert(`Wallet connected: ${connectedWallet.address}`);
             } catch (error) {
                 console.error("Wallet connection failed:", error);
@@ -61,36 +131,36 @@
             const transaction = {
                 messages: [
                     {
-                        address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0",
+                        address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0", // Destination address
                         amount: "20000000" // Toncoin in nanotons
                     }
                 ]
             };
 
             try {
-                console.log("Sending transaction...");
                 const result = await tonConnectUI.sendTransaction(transaction);
                 console.log("Transaction result:", result);
                 Telegram.WebApp.showAlert("Transaction sent successfully!");
             } catch (error) {
-                console.error("Transaction failed:", error);
+                console.error("Error sending transaction:", error);
                 Telegram.WebApp.showAlert("Transaction failed. Please try again.");
             }
         }
 
         async function disconnectWallet() {
             try {
-                console.log("Disconnecting wallet...");
                 await tonConnectUI.disconnect();
                 console.log("Wallet disconnected");
-                Telegram.WebApp.showAlert("Wallet disconnected.");
+                Telegram.WebApp.showAlert("Wallet disconnected successfully.");
             } catch (error) {
                 console.error("Error disconnecting wallet:", error);
+                Telegram.WebApp.showAlert("Error disconnecting wallet.");
             }
         }
 
-        // Initialize Telegram Web App
+        // Telegram Web App initialization
         Telegram.WebApp.ready();
+
         Telegram.WebApp.MainButton.setParams({ text: 'Main Button' });
         Telegram.WebApp.MainButton.show();
 
@@ -118,8 +188,9 @@
         }
     </script>
 
-    <!-- Eruda is a console for mobile browsers -->
+    <!-- Eruda Console for Debugging -->
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
 </body>
+
 </html>
