@@ -6,7 +6,7 @@
     <title>TON Connect Wallet Integration</title>
 
     <!-- TON Connect SDK -->
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js" defer></script>
 </head>
 <body>
     <h1>TON Connect Wallet Integration</h1>
@@ -16,9 +16,14 @@
 
     <script>
         window.onload = function() {
+            if (typeof TONConnectUI === 'undefined') {
+                console.error('TONConnectUI is not loaded.');
+                return;
+            }
+
             // Initialize TONConnectUI when the window is loaded
             const tonConnectUI = new TONConnectUI({
-                manifestUrl: 'https://https://rkjangir26.github.io/boiler_mini_App//tonconnect-manifest.json', // Replace with your app's manifest URL
+                manifestUrl: 'https://rkjangir26.github.io/boiler_mini_App//tonconnect-manifest.json', // Replace with your app's manifest URL
                 buttonRootId: 'ton-connect' // The root ID for the button
             });
 
