@@ -1,47 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON Connect Wallet Integration</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Telegram Mini Apps with TON Connect</title>
+    <style>
+        body {
+            --bg-color: var(--tg-theme-bg-color);
+            font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 48px 24px;
+            padding: 0;
+            color-scheme: var(--tg-color-scheme);
+        }
 
-    <!-- TON Connect SDK -->
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js" defer></script>
+        a {
+            color: var(--tg-theme-link-color);
+        }
+        #viewport {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: var(--tg-viewport-stable-height, 100vh);
+            pointer-events: none;
+            transition: all .2s ease;
+        }
+        #viewport:after {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            border-width: 4px;
+            border-style: solid;
+            border-image: linear-gradient(45deg, rgba(64, 224, 208, .5), rgba(173, 255, 47, .5)) 1;
+        }
+
+        #viewport-params-size,
+        #viewport-params-expand {
+            position: absolute;
+            display: inline-block;
+            background: var(--tg-theme-link-color, rgb(64, 224, 208));
+            right: 4px;
+            left: auto;
+            font-size: 8px;
+            padding: 4px;
+            vertical-align: top;
+        }
+        #viewport-params-size {
+            top: 4px;
+        }
+        #viewport-params-expand {
+            top: 30px;
+        }
+    </style>
 </head>
-<body>
-    <h1>TON Connect Wallet Integration</h1>
 
-    <!-- Button to trigger wallet connection -->
-    <button id="connect-btn">Connect to Wallet</button>
+<body>
+    <main>
+        <div align="center">
+            <a href="https://ton.org/"><img width="48" src="./assets/tapps.png" alt="logo of telegram web apps"></a>
+        </div>
+        <h1>TON Connect</h1>
+        <div id="ton-connect"></div>
+        <button onclick="connectToWallet()">Connect Wallet</button>
+        <button onclick="sendTransaction()">Send Transaction</button>
+        <button onclick="disconnectWallet()">Disconnect Wallet</button>
+
+        <h1>Modals</h1>
+        <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
+        <button onclick="showPopup();">Launch Popup</button>
+
+        <h1>Links</h1>
+        <ul>
+            <li>
+                <a href="javascript:Telegram.WebApp.openTelegramLink('https://t.me/trendingapps');">Open link within Telegram</a>
+            </li>
+            <li>
+                <a href="javascript:Telegram.WebApp.openLink('https://ton.org/');">Open link in external browser</a>
+            </li>
+            <li>
+                <a href="javascript:Telegram.WebApp.openLink('https://telegra.ph/api',{try_instant_view:true});">Open link inside Telegram webview</a>
+            </li>
+        </ul>
+
+        <h1>Buttons</h1>
+        <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
+        <button onclick="toggleMainButton();">Toggle Main Button</button>
+    </main>
+    <div id="viewport"></div>
+    <div id="viewport-params-size"></div>
+    <div id="viewport-params-expand"></div>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui"></script>
 
     <script>
-        window.onload = function() {
-            if (typeof TONConnectUI === 'undefined') {
-                console.error('TONConnectUI is not loaded.');
-                return;
-            }
-
-            // Initialize TONConnectUI when the window is loaded
-            const tonConnectUI = new TONConnectUI({
-                manifestUrl: 'https://rkjangir26.github.io/boiler_mini_App//tonconnect-manifest.json', // Replace with your app's manifest URL
-                buttonRootId: 'ton-connect' // The root ID for the button
-            });
-
-            // Function to connect to wallet
-            async function connectToWallet() {
-                try {
-                    const wallet = await tonConnectUI.connectWallet();
-                    console.log('Connected Wallet:', wallet);
-                    alert(`Connected to wallet: ${wallet.address}`);
-                } catch (error) {
-                    console.error('Error connecting to wallet:', error);
-                    alert('Failed to connect to wallet.');
-                }
-            }
-
-            // Add event listener to the connect button
-            document.getElementById('connect-btn').addEventListener('click', connectToWallet);
-        };
+        const connector = new TonConnectSDK.TonConnect();
     </script>
+    <!-- <script>
+        // Initialize TON Connect
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://<https://rkjangir26.github.io/boiler_mini_App/>/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        }); -->
+
+        async function connectToWallet() {
+            try {
+                const connectedWallet = await connector.connectWallet();
+                console.log('Connected wallet:', connectedWallet);
+            } catch (error) {
+                console.error('Error connecting to wallet:', error);
+            }
+        }
+
+        async function sendTransaction() {
+            const transaction = {
+                messages: [
+                    {
+                        address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0", // Destination address
+                        amount: "20000000" // Toncoin in nanotons
+                    }
+                ]
+            };
+
+            try {
+                const result = await connector.sendTransaction(transaction);
+                console.log('Transaction result:', result);
+            } catch (error) {
+                console.error('Error sending transaction:', error);
+            }
+        }
+
+        async function disconnectWallet() {
+            try {
+                await connector.disconnect();
+                console.log('Wallet disconnected');
+            } catch (error) {
+                console.error('Error disconnecting wallet:', error);
+            }
+        }
+
+        // Initialize Telegram Web App
+        Telegram.WebApp.ready();
+
+        Telegram.WebApp.MainButton.setParams({ text: 'Main Button' });
+        Telegram.WebApp.MainButton.show();
+
+        function toggleMainButton() {
+            if (Telegram.WebApp.MainButton.isVisible) {
+                Telegram.WebApp.MainButton.hide();
+            } else {
+                Telegram.WebApp.MainButton.show();
+            }
+        }
+
+        function showPopup() {
+            Telegram.WebApp.showPopup({
+                title: 'Title',
+                message: 'Some message',
+                buttons: [
+                    { id: 'link', type: 'default', text: 'Open ton.org' },
+                    { type: 'cancel' }
+                ]
+            }, function (btn) {
+                if (btn === 'link') {
+                    Telegram.WebApp.openLink('https://ton.org/');
+                }
+            });
+        }
+    </script>
+
+    <!-- Eruda is console for mobile browsers -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 </body>
 </html>
