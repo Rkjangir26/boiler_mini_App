@@ -77,10 +77,6 @@
         <button onclick="sendTransaction()">Send Transaction</button>
         <button onclick="disconnectWallet()">Disconnect Wallet</button>
 
-        <h1>Modals</h1>
-        <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
-        <button onclick="showPopup();">Launch Popup</button>
-
         <h1>Links</h1>
         <ul>
             <li>
@@ -89,14 +85,10 @@
             <li>
                 <a href="javascript:Telegram.WebApp.openLink('https://ton.org/');">Open link in external browser</a>
             </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://telegra.ph/api',{try_instant_view:true});">Open link inside Telegram webview</a>
-            </li>
         </ul>
 
         <h1>Buttons</h1>
         <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
-        <button onclick="toggleMainButton();">Toggle Main Button</button>
     </main>
     <div id="viewport"></div>
     <div id="viewport-params-size"></div>
@@ -104,21 +96,25 @@
 
     <!-- Import Telegram Web App and TON Connect UI scripts -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui"></script>
+    <!-- Ensure this CDN is working correctly, or consider using a local bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/sdk@latest"></script>
 
     <script>
-        // Initialize TON Connect
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://rkjangir26.github.io/boiler_mini_App/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect'
-        });
+        let tonConnectUI;
 
+        // Initialize TON Connect UI after script loads
+        window.onload = function () {
+            tonConnectUI = new TONConnectUI.TonConnectUI({
+                manifestUrl: 'https://rkjangir26.github.io/boiler_mini_App/tonconnect-manifest.json',
+                buttonRootId: 'ton-connect'
+            });
+        }
+
+        // Function to connect wallet
         async function connectToWallet() {
             try {
-                console.log("Opening wallet selection popup...");
-                const connectedWallet = await tonConnectUI.connectWallet({
-                    uiPreferences: { forceModal: true }
-                });
+                console.log("Opening wallet selection...");
+                const connectedWallet = await tonConnectUI.connectWallet();
                 console.log("Connected wallet:", connectedWallet);
                 Telegram.WebApp.showAlert(`Wallet connected: ${connectedWallet.address}`);
             } catch (error) {
@@ -127,12 +123,13 @@
             }
         }
 
+        // Function to send a transaction
         async function sendTransaction() {
             const transaction = {
                 messages: [
                     {
-                        address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0", // Destination address
-                        amount: "20000000" // Toncoin in nanotons
+                        address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0", 
+                        amount: "20000000" 
                     }
                 ]
             };
@@ -147,6 +144,7 @@
             }
         }
 
+        // Function to disconnect wallet
         async function disconnectWallet() {
             try {
                 await tonConnectUI.disconnect();
@@ -158,33 +156,20 @@
             }
         }
 
-        // Telegram Web App initialization
+        // Initialize Telegram Web App
         Telegram.WebApp.ready();
 
+        // Main button initialization
         Telegram.WebApp.MainButton.setParams({ text: 'Main Button' });
         Telegram.WebApp.MainButton.show();
 
+        // Toggle visibility of the main button
         function toggleMainButton() {
             if (Telegram.WebApp.MainButton.isVisible) {
                 Telegram.WebApp.MainButton.hide();
             } else {
                 Telegram.WebApp.MainButton.show();
             }
-        }
-
-        function showPopup() {
-            Telegram.WebApp.showPopup({
-                title: 'Title',
-                message: 'Some message',
-                buttons: [
-                    { id: 'link', type: 'default', text: 'Open ton.org' },
-                    { type: 'cancel' }
-                ]
-            }, function (btn) {
-                if (btn === 'link') {
-                    Telegram.WebApp.openLink('https://ton.org/');
-                }
-            });
         }
     </script>
 
